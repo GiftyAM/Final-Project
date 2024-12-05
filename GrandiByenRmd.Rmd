@@ -1,0 +1,1033 @@
+---
+title: "GB1"
+author: "Gifty"
+date: "2024-10-14"
+output: html_document
+---
+
+```{r}
+#loading dataset
+GB1<-read.csv("C:/Users/Gifty Aboagye-Mensah/Documents/Work/E3 lab/Grandi Byen/grandi_byen_baseline Gif.csv")
+
+```
+
+```{r}
+#loading necessary libraries
+pacman::p_load(dplyr, readr)
+```
+
+```{r}
+#checking first few rows to confirm
+head(GB1)
+```
+
+```{r}
+#There are different ASQ scores for the 2 different age groups in the dataset, further data wrangling is needed
+# Creating a new column categorizing Current.age as <7 and >=7
+GB1 <- GB1 %>%
+  mutate(Age_Group = ifelse(Current.age < 7, "<7", ">=7"))
+
+```
+
+```{r}
+# Viewing the first few rows to confirm
+head(GB1)
+```
+
+```{r}
+# Creating a dataset with rows where Current.age < 7
+GB1_under7 <- GB1 %>%
+  filter(Current.age < 7)
+
+```
+
+```{r}
+# Creating a dataset with rows where Current.age >= 7
+GB1_7andAbove <- GB1 %>%
+  filter(Current.age >= 7)
+```
+
+```{r}
+# Categorizing Communication.points.asq6 in GB1_under7
+GB1_under7 <- GB1_under7 %>%
+  mutate(Communication_Category = case_when(
+    Communication.points.asq6 < 30 ~ "Below cutoff",
+    Communication.points.asq6 >= 30 & Communication.points.asq6 <= 39 ~ "Monitoring zone",
+    Communication.points.asq6 >= 40 ~ "On schedule"
+  ))
+
+#Viewing the first few rows to confirm
+head(GB1_under7)
+```
+
+```{r}
+# Categorizing Gross.motor.points.asq6 in GB1_under7
+GB1_under7 <- GB1_under7 %>%
+  mutate(Gross_Motor_Category = case_when(
+    Gross.motor.points.asq6 < 23 ~ "Below cutoff",
+    Gross.motor.points.asq6 >= 23 & Gross.motor.points.asq6 <= 34 ~ "Monitoring zone",
+    Gross.motor.points.asq6 > 34 ~ "On schedule"
+  ))
+
+# Viewing the first few rows to confirm
+head(GB1_under7)
+
+```
+
+```{r}
+# Categorizing Fine.motor.points.asq6 in GB1_under7
+GB1_under7 <- GB1_under7 %>%
+  mutate(Fine_Motor_Category = case_when(
+    Fine.motor.points.asq6 < 25 ~ "Below cutoff",
+    Fine.motor.points.asq6 >= 25 & Fine.motor.points.asq6 <= 37 ~ "Monitoring zone",
+    Fine.motor.points.asq6 > 37 ~ "On schedule"
+  ))
+
+# Viewing the first few rows to confirm
+head(GB1_under7)
+```
+
+```{r}
+# Categorizing asq_kp in GB1_7andAbove
+GB1_7andAbove <- GB1_7andAbove %>%
+  mutate(Communication_Category = case_when(
+    asq_kp < 33 ~ "Below cutoff",
+    asq_kp >= 33 & asq_kp <= 43 ~ "Monitoring zone",
+    asq_kp > 43 ~ "On schedule"
+  ))
+
+# Viewing the first few rows to confirm
+head(GB1_7andAbove)
+
+```
+
+```{r}
+# Categorizing asq_kp in GB1_7andAbove
+GB1_7andAbove <- GB1_7andAbove %>%
+  mutate(Gross_Motor_Category = case_when(
+    asq_mp < 31 ~ "Below cutoff",
+    asq_mp >= 31 & asq_mp <= 42 ~ "Monitoring zone",
+    asq_mp > 42 ~ "On schedule"
+  ))
+
+# Viewing the first few rows to confirm
+head(GB1_7andAbove)
+```
+
+```{r}
+# Categorizing asq_kp in GB1_7andAbove
+GB1_7andAbove <- GB1_7andAbove %>%
+  mutate(Fine_Motor_Category = case_when(
+    asq_fp < 40 ~ "Below cutoff",
+    asq_fp >= 40 & asq_fp <= 48 ~ "Monitoring zone",
+    asq_fp > 48 ~ "On schedule"
+  ))
+
+# Viewing the first few rows to confirm
+head(GB1_7andAbove)
+```
+
+```{r}
+# Merging the under7 and 7andAbove datasets
+GB1_merged <- bind_rows(GB1_under7, GB1_7andAbove)
+
+# Viewing the first few rows to confirm
+head(GB1_merged)
+
+```
+
+```{r}
+#Applying exclusion criteria 
+# Creating a new dataset with only rows where Relationship.to.child is "Mother"
+GB1_merged_mothers <- GB1_merged %>%
+  filter(tolower(trimws(Relationship.to.child)) == "mother")
+
+# Viewing the first few rows to confirm
+head(GB1_merged_mothers)
+
+
+```
+
+```{r}
+#More wrangling
+# Categorizing Age variable in GB1_mothers
+GB1_merged_mothers <- GB1_merged_mothers %>%
+  mutate(Age_Category = case_when(
+    Age < 20 ~ "<20",
+    Age >= 20 & Age <= 24 ~ "20-24",
+    Age >= 25 & Age <= 29 ~ "25-29",
+    Age >= 30 & Age <= 34 ~ "30-34",
+    Age >= 35 & Age <= 39 ~ "35-39",
+    Age >= 40 ~ ">=40"
+  ))
+
+# Viewing the first few rows to confirm
+head(GB1_merged_mothers)
+
+```
+
+```{r}
+# Creating Maternal_Morbidity_Category based on Maternal.Morbidity column
+GB1_merged_mothers <- GB1_merged_mothers %>%
+  mutate(Maternal_Morbidity_Category = if_else(
+    Maternal.Morbidity != "None", "Yes", "No"
+  ))
+
+# Viewing the first few rows to confirm
+head(GB1_merged_mothers)
+
+```
+
+```{r}
+# Creating Child_Chronic_Disease_Category based on Child.chronic.disease column
+GB1_merged_mothers <- GB1_merged_mothers %>%
+  mutate(Child_Chronic_Disease_Category = if_else(
+    Child.chronic.disease == "None", "No", "Yes"
+  ))
+
+# Viewing the first few rows to confirm
+head(GB1_merged_mothers)
+
+```
+
+```{r}
+
+# Creating the new dataset GB2 with selected columns from GB1_mothers
+GB2 <- GB1_merged_mothers %>%
+  dplyr::select(
+    id, Age, Number.of.children.in.household, Child.birthweight.kg., Current.age,
+    Education, Occupation, Marital.Status, Monthly.household.income, Remittance.received,
+    Home, Land, Delivery.method, Full.term.child, Sex..Child., Communication_Category,
+    Gross_Motor_Category, Fine_Motor_Category, Age_Category, Child_Chronic_Disease_Category,  Maternal_Morbidity_Category, asq_kp, asq_mp, asq_fp
+  )
+
+# Viewing the first few rows to confirm
+head(GB2)
+
+
+```
+
+```{r}
+#Creating the new dataset GB3 with selected columns from GB1_mothers
+GB3 <- GB1_merged_mothers %>%
+  dplyr::select(
+    id, Age, Number.of.children.in.household, Child.birthweight.kg., Current.age,
+    Education, Occupation, Marital.Status, Monthly.household.income, Remittance.received,
+    Home, Land, Delivery.method, Full.term.child, Sex..Child., Communication_Category,
+    Gross_Motor_Category, Fine_Motor_Category, Age_Category, Child_Chronic_Disease_Category,  Maternal_Morbidity_Category, Any.STI, Hypertension, Anemia, Gestational.diabetes..Diabetes, Pre.eclampsia..Eclampsia, COVID.19, Other, asq_kp, asq_mp, asq_fp
+  )
+
+# Viewing the first few rows to confirm
+head(GB3)
+```
+
+```{r}
+#Loading necessary libraries
+pacman::p_load(tidyverse, readr, table1, DiagrammeR, rsvg, tableone)
+               
+```
+
+
+
+```{r}
+#Applying exclusion criteria
+# Excluding rows where asq_kp, asq_fp, or asq_mp have a value of 0
+GB3 <- GB3 %>%
+  filter(asq_kp != 0, asq_fp != 0, asq_mp != 0)
+
+```
+
+
+
+```{r}
+#Table 1
+# Defining the variables I want to include in Table 1
+vars <- colnames(GB3)  # This includes all columns in GB3
+
+# Creating Table 1 without any stratification
+table1 <- CreateTableOne(vars = vars, data = GB3, includeNA = TRUE)
+
+# Printing Table 1 to view
+print(table1)
+
+```
+
+
+
+```{r}
+# Install naniar package if not already installed
+#if (!require("naniar")) install.packages("naniar")
+library(naniar)
+
+# Replacing specific values with NA in the GB1_7andAbove dataset
+GB1_7andAbove <- replace_with_na(GB1_7andAbove, replace = list(
+                               Age = c(0),
+                               asq_kp = c(0),
+                               asq_mp = c(0),
+                               asq_fp = c(0),
+                               Current.age = c(0)))
+```
+
+
+```{r}
+#Creating a new variable since some participants had multiple morbidites
+GB3 <- GB3 %>%
+  mutate(
+    Morbidity_Count = rowSums(across(c(Any.STI, Hypertension, Anemia, Gestational.diabetes..Diabetes, Pre.eclampsia..Eclampsia, COVID.19, Other), 
+                                     ~ . == "Yes"), 
+                              na.rm = TRUE)
+  )
+
+```
+
+```{r}
+#Taking a look
+head(GB3)
+```
+
+```{r}
+# Defining the variables I want to include in Table 1
+vars <- colnames(GB3)  # This includes all columns in GB3
+
+# Creating Table 1 without any stratification
+table1 <- CreateTableOne(vars = vars, data = GB3, includeNA = TRUE)
+
+# Printing Table 1 to view
+print(table1)
+```
+
+```{r}
+# creating a morbidity count variable if not done already
+GB3 <- GB3 %>%
+  mutate(
+    Morbidity_Count = rowSums(across(c(Any.STI, Hypertension, Anemia, Gestational.diabetes..Diabetes, Pre.eclampsia..Eclampsia, COVID.19, Other), 
+                                     ~ . == "Yes"), 
+                              na.rm = TRUE)
+  )
+
+# Using count() to get the frequency of each morbidity count
+morbidity_summary <- GB3 %>%
+  count(Morbidity_Count) %>%
+  mutate(Percentage = (n / sum(n)) * 100)
+
+# Displaying the summary table
+morbidity_summary
+
+```
+
+```{r}
+# Calculating morbidity count with percentages rounded to one decimal place
+morbidity_summary <- GB3 %>%
+  count(Morbidity_Count) %>%
+  mutate(Percentage = round((n / sum(n)) * 100, 1))
+
+# Adjusting the percentages to make sure they add up exactly to 100
+# Calculating the difference from 100% and adjust the largest group accordingly
+difference <- 100 - sum(morbidity_summary$Percentage)
+if (difference != 0) {
+  # Finding the index of the largest group and add the difference
+  max_index <- which.max(morbidity_summary$n)
+  morbidity_summary$Percentage[max_index] <- morbidity_summary$Percentage[max_index] + difference
+}
+
+# Displaying the final table
+morbidity_summary
+
+```
+
+```{r}
+print(table1)
+```
+
+```{r}
+#Adding in the MDD variable from the mother dataset
+Motherdataset<-read.csv("C:/Users/Gifty Aboagye-Mensah/Documents/Work/E3 lab/Grandi Byen/grandi_byen_baseline.csv")
+GB4 <- merge(GB3, Motherdataset[, c("id", "MDD")], by = "id", all.x = TRUE)
+
+```
+
+
+
+
+
+```{r}
+# loading the gtsummary package
+library(gtsummary)
+
+#viewing columns
+colnames(GB4)
+
+
+```
+```{r}
+# Create a summary table
+table1_summary <- GB4 %>%
+  select(
+    Age, Age_Category, Number.of.children.in.household, 
+    Current.age, Education, Occupation, Marital.Status, Monthly.household.income,
+    Remittance.received, Home, Land, Delivery.method, Full.term.child, Sex..Child., 
+    Communication_Category, Gross_Motor_Category, Fine_Motor_Category, 
+    Child_Chronic_Disease_Category, Maternal_Morbidity_Category, MDD
+  ) %>%
+  tbl_summary(by = NULL, missing = "ifany")  # Use gtsummary for a summary table
+
+```
+
+
+```{r}
+tbl <- GB4 %>%
+  tbl_summary(
+    by = NULL,  # Summarize overall (no grouping variable)
+    missing = "ifany"  # Handle missing data
+  )
+
+
+# Print the summary table
+print(tbl)
+
+
+
+
+
+```
+
+```{r}
+#Exporting table1
+write.csv(as.data.frame(print(tbl)), "Tbl_GB4.csv")
+
+```
+
+```{r}
+#Categorical analysis
+# Contingency table
+table(GB4$Age_Category, GB4$Communication_Category)
+table(GB4$Age_Category, GB4$Fine_Motor_Category)
+table(GB4$Age_Category, GB4$Gross_Motor_Category)
+
+
+```
+
+
+
+```{r}
+table(GB4$Occupation, GB4$Communication_Category)
+table(GB4$Occupation, GB4$Fine_Motor_Category)
+table(GB4$Occupation, GB4$Gross_Motor_Category)
+
+```
+
+
+```{r}
+# Checking p-values for each ASQ category
+fisher_comm <- fisher.test(table(GB4$Age_Category, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_comm
+
+
+fisher_fm <- fisher.test(table(GB4$Age_Category, GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_fm
+
+fisher_gm <- fisher.test(table(GB4$Age_Category, GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_gm
+
+```
+
+```{r}
+table(GB4$Education, GB4$Communication_Category)
+table(GB4$Education, GB4$Fine_Motor_Category)
+table(GB4$Education, GB4$Gross_Motor_Category)
+```
+
+```{r}
+# Checking p-values for each ASQ category
+fisher_edu_comm <- fisher.test(table(GB4$Education, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_edu_comm
+
+
+fisher_edu_fm <- fisher.test(table(GB4$Education, GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_edu_fm
+
+fisher_edu_gm <- fisher.test(table(GB4$Education, GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_edu_gm
+```
+
+```{r}
+table(GB4$MDD, GB4$Communication_Category)
+table(GB4$MDD, GB4$Fine_Motor_Category)
+table(GB4$MDD, GB4$Gross_Motor_Category)
+```
+
+```{r}
+# Checking p-values for each ASQ category
+fisher_MDD_comm <- fisher.test(table(GB4$MDD, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_MDD_comm
+
+
+fisher_MDD_fm <- fisher.test(table(GB4$MDD, GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_MDD_fm
+
+fisher_MDD_gm <- fisher.test(table(GB4$MDD, GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_MDD_gm
+```
+
+```{r}
+table(GB4$Maternal_Morbidity_Category, GB4$Communication_Category)
+table(GB4$Maternal_Morbidity_Category, GB4$Fine_Motor_Category)
+table(GB4$Maternal_Morbidity_Category, GB4$Gross_Motor_Category)
+```
+
+```{r}
+fisher_Morb_comm <- fisher.test(table(GB4$Maternal_Morbidity_Category, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_Morb_comm
+
+
+fisher_Morb_fm <- fisher.test(table(GB4$Maternal_Morbidity_Category, GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_Morb_fm
+
+fisher_Morb_gm <- fisher.test(table(GB4$Maternal_Morbidity_Category, GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_Morb_gm
+```
+
+```{r}
+table(GB4$Sex..Child., GB4$Communication_Category)
+table(GB4$Sex..Child., GB4$Fine_Motor_Category)
+table(GB4$Sex..Child., GB4$Gross_Motor_Category)
+```
+
+```{r}
+fisher_sex_comm <- fisher.test(table(GB4$Sex..Child., GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_sex_comm
+
+
+fisher_sex_fm <- fisher.test(table(GB4$Sex..Child., GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_sex_fm
+
+fisher_sex_gm <- fisher.test(table(GB4$Sex..Child., GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_sex_gm
+```
+
+```{r}
+table(GB4$Number.of.children.in.household, GB4$Communication_Category)
+table(GB4$Number.of.children.in.household, GB4$Fine_Motor_Category)
+table(GB4$Number.of.children.in.household, GB4$Gross_Motor_Category)
+```
+
+```{r}
+fisher_children_comm <- fisher.test(table(GB4$Number.of.children.in.household, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_children_comm
+
+
+fisher_children_fm <- fisher.test(table(GB4$Number.of.children.in.household, GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_children_fm
+
+fisher_children_gm <- fisher.test(table(GB4$Number.of.children.in.household, GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_children_gm
+```
+
+
+
+
+```{r}
+table(GB4$Child_Chronic_Disease_Category, GB4$Communication_Category)
+table(GB4$Child_Chronic_Disease_Category, GB4$Fine_Motor_Category)
+table(GB4$Child_Chronic_Disease_Category, GB4$Gross_Motor_Category)
+```
+
+```{r}
+fisher_chronic_comm <- fisher.test(table(GB4$Child_Chronic_Disease_Category, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_chronic_comm
+
+
+fisher_chronic_fm <- fisher.test(table(GB4$Child_Chronic_Disease_Category, GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_chronic_fm
+
+fisher_chronic_gm <- fisher.test(table(GB4$Child_Chronic_Disease_Category, GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_chronic_gm
+```
+
+```{r}
+table(GB4$Home, GB4$Communication_Category)
+table(GB4$Home, GB4$Fine_Motor_Category)
+table(GB4$Home, GB4$Gross_Motor_Category)
+```
+
+```{r}
+fisher_home_comm <- fisher.test(table(GB4$Home, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_home_comm
+
+
+fisher_home_fm <- fisher.test(table(GB4$Home, GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_home_fm
+
+fisher_home_gm <- fisher.test(table(GB4$Home, GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_home_gm
+```
+
+
+
+Test 
+```{r}
+# Checking p-values for each ASQ category
+fisher_occ_comm <- fisher.test(table(GB4$Occupation, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
+fisher_occ_comm
+
+
+fisher_occ_fm <- fisher.test(table(GB4$Occupation, GB4$Fine_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_occ_fm
+
+fisher_occ_gm <- fisher.test(table(GB4$Occupation, GB4$Gross_Motor_Category), simulate.p.value = TRUE, B = 10000)
+fisher_occ_gm
+```
+
+
+
+
+Test Keep
+```{r}
+str(GB4$Communication_Category)
+
+```
+
+```{r}
+# Ensure the categories are ordered if appropriate
+GB4$Communication_Category <- factor(
+  GB4$Communication_Category, 
+  levels = c("Below cutoff", "Monitoring zone", "On schedule"), 
+  ordered = TRUE
+)
+
+GB4$Fine_Motor_Category <- factor(
+  GB4$Fine_Motor_Category, 
+  levels = c("Below cutoff", "Monitoring zone", "On schedule"), 
+  ordered = TRUE
+)
+
+GB4$Gross_Motor_Category <- factor(
+  GB4$Gross_Motor_Category, 
+  levels = c("Below cutoff", "Monitoring zone", "On schedule"), 
+  ordered = TRUE
+)
+
+```
+
+```{r}
+library(MASS)
+
+# Fit ordinal logistic regression models
+model_communication <- polr(Communication_Category ~ Age_Category, data = GB4, method = "logistic")
+model_fine_motor <- polr(Fine_Motor_Category ~ Age_Category, data = GB4, method = "logistic")
+model_gross_motor <- polr(Gross_Motor_Category ~ Age_Category, data = GB4, method = "logistic")
+
+```
+
+```{r}
+# Helper function to format results
+format_results <- function(coefs) {
+  data.frame(
+    Predictor = rownames(coefs),
+    Coefficient = coefs[, "Value"],
+    SE = coefs[, "Std. Error"],
+    OR = exp(coefs[, "Value"]),
+    CI_Lower = exp(coefs[, "Value"] - 1.96 * coefs[, "Std. Error"]),
+    CI_Upper = exp(coefs[, "Value"] + 1.96 * coefs[, "Std. Error"]),
+    P_Value = 2 * (1 - pnorm(abs(coefs[, "t value"])))
+  )
+}
+
+# Format results for each model
+communication_results <- format_results(summary(model_communication)$coefficients)
+fine_motor_results <- format_results(summary(model_fine_motor)$coefficients)
+gross_motor_results <- format_results(summary(model_gross_motor)$coefficients)
+
+# Combine all results into one table
+library(dplyr)
+all_results <- bind_rows(
+  communication_results %>% mutate(Skill = "Communication"),
+  fine_motor_results %>% mutate(Skill = "Fine Motor"),
+  gross_motor_results %>% mutate(Skill = "Gross Motor")
+)
+
+# Display the table in a clean format
+library(knitr)
+all_results %>%
+  kable(
+    col.names = c("Predictor", "Coefficient", "SE", "Odds Ratio", 
+                  "95% CI Lower", "95% CI Upper", "P-Value", "Skill"),
+    caption = "Ordinal Logistic Regression Results by ASQ-3 Skill Category"
+  )
+
+```
+
+
+
+```{r}
+library(dplyr)
+GB4 <- GB4 %>%
+  mutate(Number.of.children.in.household = case_when(
+    Number.of.children.in.household >= 0 & Number.of.children.in.household <= 3 ~ "0-3",
+    Number.of.children.in.household >= 4 & Number.of.children.in.household <= 7 ~ "4-7",
+    Number.of.children.in.household >= 8 & Number.of.children.in.household <= 11 ~ "8-11",
+    Number.of.children.in.household >= 12 & Number.of.children.in.household <= 15 ~ "12-15"
+  ))
+
+# View the first few rows to confirm
+head(GB4)
+```
+
+
+```{r}
+#Categorizing birthweight
+
+GB4$Childbirthweight.category <- case_when(
+  GB4$Child.birthweight.kg. >= 0 & GB4$Child.birthweight.kg. < 2.5 ~ "Low",
+  GB4$Child.birthweight.kg. >= 2.5 & GB4$Child.birthweight.kg. <= 4.5 ~ "Normal",
+  GB4$Child.birthweight.kg. >4.5 ~ "High",
+)
+head(GB4)
+
+```
+
+```{r}
+# Recoding Minimum Dietary Diversity as a count (1-7 food groups)
+GB4$MDD <- as.factor(GB4$MDD)
+
+# Recoding Mother's Education
+GB4$Education <- factor(GB4$Education, levels = c("None", "Primary school", "Secondary school", "Vocational school", "University", "Graduate"))
+
+# Recoding Maternal morbidity (Yes or No)
+GB4$Maternal_Morbidity_Category <- factor(GB4$Maternal_Morbidity_Category, levels = c("No", "Yes"))
+
+# Recoding Child sex (Male or Female)
+GB4$Sex..Child. <- factor(GB4$Sex..Child., levels = c("Male", "Female"))
+
+# Recoding Method of delivery (Vaginal or Cesarean)
+GB4$Delivery.method <- factor(GB4$Delivery.method, levels = c("Vaginal", "Cesarean"))
+
+# Recoding Number of children in the household (0-3, 4-7, 8-11, 12-15)
+GB4$Number.of.children.in.household <- factor(GB4$Number.of.children.in.household, levels = c("0-3", "4-7", "8-11", "12-15"))
+
+# Recoding Child birth weight (Low, Normal, High)
+GB4$Childbirthweight.category <- factor(GB4$Childbirthweight.category, levels = c("Low", "Normal", "High"))
+
+# Recoding Marital status (Married or Not Married)
+GB4$Marital.Status <- factor(GB4$Marital.Status, levels = c("Married", "Not Married"))
+
+
+# Recoding Home ownership (Own, Rent/Borrow, Do not have)
+GB4$Home <- factor(GB4$Home, levels = c("Own", "Rent/borrow/share", "Do not have"))
+
+# Recoding Child chronic disease (Yes or No)
+GB4$Child_Chronic_Disease_Category <- factor(GB4$Child_Chronic_Disease_Category, levels = c("No", "Yes"))
+
+GB4$Age_Category <- factor(GB4$Age_Category, levels = c("<20", "20-24", "25-29", "30-34", "35-39", ">=40"))
+
+GB4$Home <- factor(GB4$Home)
+GB4$Occupation <- factor(GB4$Occupation)
+
+```
+
+```{r}
+levels(GB4$Maternal_Morbidity_Category)
+levels(GB4$Education)
+levels(GB4$Delivery.method)
+levels(GB4$Communication_Category)
+levels(GB4$Sex..Child.)
+levels(GB4$Child_Chronic_Disease_Category)
+levels(GB4$Age_Category)
+levels(GB4$MDD)
+levels(GB4$Occupation)
+levels(GB4$Marital.Status)
+levels(GB4$Home)
+levels(GB4$Number.of.children.in.household)
+```
+
+
+```{r}
+summary(GB4$Child_Chronic_Disease_Category)
+summary(GB4$Age_Category)
+summary(GB4$Sex..Child.)
+summary(GB4$Maternal_Morbidity_Category)
+summary(GB4$Childbirthweight.category)
+summary(GB4$Marital.Status)
+summary(GB4$Home)
+summary(GB4$Communication_Category)
+summary(GB4$Gross_Motor_Category)
+summary(GB4$Fine_Motor_Category)
+summary(GB4$Education)
+summary(GB4$MDD)
+summary(GB4$Delivery.method)
+```
+
+```{r}
+summary(GB4)
+```
+
+
+
+```{r}
+# Subset the dataset to include only the relevant variables
+subset_GB4 <- GB4[, c( "id" , "Maternal_Morbidity_Category", "Child_Chronic_Disease_Category", "MDD", "Sex..Child." , "Occupation")]
+
+colnames(GB4)
+
+
+# Convert Occupation and other categorical variables to factors
+subset_GB4$Occupation <- factor(GB4$Occupation, exclude = NULL)  # Include NA levels explicitly
+subset_GB4$MDD <- factor(GB4$MDD, levels = c(0, 1, 2, 3, 4, 5, 6, 7))
+subset_GB4$Maternal_Morbidity_Category <- factor(GB4$Maternal_Morbidity_Category)
+subset_GB4$Child_Chronic_Disease_Category <- factor(GB4$Child_Chronic_Disease_Category)
+subset_GB4$Sex..Child. <- factor(GB4$Sex..Child., exclude = NULL)
+
+
+# Check the subset
+head(subset_GB4)
+
+```
+
+
+```{r}
+# Loading the mice package
+library(mice)
+# Convert MDD to a factor with all levels, including the missing levels
+subset_GB4$MDD <- factor(GB4$MDD, levels = c(0, 1, 2, 3, 4, 5, 6, 7))
+
+ncol(subset_GB4)
+
+
+# Checking the structure of your dataset
+str(subset_GB4)
+
+# Defining imputation methods for all variables in subset_GB4
+methods <- c(
+  id = "", 
+  Maternal_Morbidity_Category = "logreg",  # Binary categorical
+  Child_Chronic_Disease_Category = "logreg",  # Binary categorical
+  MDD = "polyreg",  # Multicategorical
+  Sex..Child. = "logreg",  # Binary categorical
+  Occupation = "polyreg"  # Multicategorical
+)
+
+# Automatically adding "" for variables not explicitly specified
+all_methods <- rep("", ncol(subset_GB4))
+names(all_methods) <- colnames(subset_GB4)
+all_methods[names(methods)] <- methods
+
+
+# Running the multiple imputation
+imputed_data <- mice(subset_GB4, method = methods, m = 6, maxit = 6, seed = 123)
+
+# Checking the summary of the imputed data
+summary(imputed_data)
+
+# Extracting the first completed dataset
+completed_data <- complete(imputed_data, 1)
+
+# Verifying that there are no missing values
+colSums(is.na(completed_data))
+
+# Viewing the first rows of the completed dataset
+head(completed_data)
+
+```
+
+```{r}
+summary(completed_data)
+```
+
+```{r}
+# Check the column names of GB4
+colnames(GB4)
+
+```
+
+
+```{r}
+
+# Subset the variables you want from GB4
+subset1_GB4 <- GB4[, c("id", "Age_Category", "Communication_Category", 
+                       "Fine_Motor_Category", "Gross_Motor_Category", 
+                       "Home", "Education", 
+                       "Number.of.children.in.household", "Childbirthweight.category")]
+
+
+# Merge the subset of GB4 with completed_data
+# Replace "id" with your common identifier column
+GB5 <- merge(completed_data, subset1_GB4, by = "id", all.x = TRUE)
+
+# Check the structure of the new dataset
+str(GB5)
+
+# View the first few rows of the new dataset
+head(GB5)
+
+
+
+```
+
+
+
+
+```{r}
+# Replace the variables in the original dataset (GB4) with the imputed values
+GB4$Maternal_Morbidity_Category <- completed_data$Maternal_Morbidity_Category
+GB4$Child_Chronic_Disease_Category <- completed_data$Child_Chronic_Disease_Category
+GB4$MDD <- completed_data$MDD
+GB4$Sex..Child.<- completed_data$Sex..Child.
+GB4$Occupation <-completed_data$Occupation
+summary(GB4)
+```
+
+```{r}
+# Ensure both datasets have the same common identifier column (e.g., "id")
+# Replace "id" with your actual common identifier if different
+if (!"id" %in% colnames(completed_data)) {
+  stop("Make sure both datasets have a common identifier column, like 'id'")
+}
+
+# Merge completed_data with GB4
+merged_data <- merge(completed_data, GB4, by = "id", all.x = TRUE)
+
+# Check the structure of the merged dataset
+str(merged_data)
+
+# Preview the first few rows
+head(merged_data)
+
+summary(GB4)
+```
+
+```{r}
+
+# Select relevant variables from GB4
+GB5 <- GB4[, c(
+  "id", 
+  "Age", 
+  "Number.of.children.in.household",   
+  "Education", 
+  "Occupation", 
+  "Home", 
+  "Sex..Child.", 
+  "Communication_Category", 
+  "Gross_Motor_Category", 
+  "Fine_Motor_Category", 
+  "Age_Category", 
+  "Child_Chronic_Disease_Category", 
+  "Maternal_Morbidity_Category", 
+  "Childbirthweight.category",
+  "MDD"
+)]
+
+```
+
+
+```{r}
+summary(GB5)
+```
+
+
+
+
+
+```{r}
+
+# Fit a model with interaction terms for maternal age and other variables
+# Load necessary library
+library(nnet)
+
+# Fit a multinomial logistic regression model with interaction
+mod_interaction <- multinom(Communication_Category ~ Age_Category * Occupation + 
+                            Age_Category * Home ,
+                            data = GB5)
+
+# Extract coefficients and standard errors
+coef_interaction <- coef(mod_interaction) # Coefficients
+se_interaction <- summary(mod_interaction)$standard.errors # Standard errors
+
+# Calculate odds ratios, 95% CIs, and p-values
+z_values <- coef_interaction / se_interaction
+p_values <- 2 * (1 - pnorm(abs(z_values))) # P-values
+
+odds_ratios <- exp(coef_interaction) # Odds ratios
+ci_lower <- exp(coef_interaction - 1.96 * se_interaction) # Lower bound of CI
+ci_upper <- exp(coef_interaction + 1.96 * se_interaction) # Upper bound of CI
+
+# Create a tidy data frame for reporting
+results_table <- data.frame(
+  Predictor = rownames(coef_interaction),
+  Odds_Ratio = odds_ratios,
+  CI_Lower = ci_lower,
+  CI_Upper = ci_upper,
+  P_Value = p_values
+)
+
+# Save the table to a CSV file or view it
+print(results_table)
+
+
+
+```
+
+
+```{r}
+#Fit a multinomial logistic regression model with interaction
+mod_interaction1 <- multinom(Fine_Motor_Category ~ Age_Category * Occupation + 
+                            Age_Category * Home ,
+                            data = GB5)
+
+# Extract coefficients and standard errors
+coef_interaction1 <- coef(mod_interaction1) # Coefficients
+se_interaction1 <- summary(mod_interaction1)$standard.errors # Standard errors
+
+# Calculate odds ratios, 95% CIs, and p-values
+z_values1 <- coef_interaction1 / se_interaction
+p_values1 <- 2 * (1 - pnorm(abs(z_values))) # P-values
+
+odds_ratios1 <- exp(coef_interaction1) # Odds ratios
+ci_lower1 <- exp(coef_interaction1 - 1.96 * se_interaction1) # Lower bound of CI
+ci_upper1 <- exp(coef_interaction1 + 1.96 * se_interaction1) # Upper bound of CI
+
+# Create a tidy data frame for reporting
+results_table1 <- data.frame(
+  Predictor = rownames(coef_interaction1),
+  Odds_Ratio = odds_ratios1,
+  CI_Lower = ci_lower1,
+  CI_Upper = ci_upper1,
+  P_Value = p_values1
+)
+
+# Save the table to a CSV file or view it
+print(results_table1)
+```
+
+```{r}
+#Fit a multinomial logistic regression model with interaction
+mod_interaction2 <- multinom(Gross_Motor_Category ~ Age_Category * Occupation + 
+                            Age_Category * Home ,
+                            data = GB5)
+
+# Extract coefficients and standard errors
+coef_interaction2 <- coef(mod_interaction2) # Coefficients
+se_interaction2 <- summary(mod_interaction2)$standard.errors # Standard errors
+
+# Calculate odds ratios, 95% CIs, and p-values
+z_values2 <- coef_interaction1 / se_interaction
+p_values2 <- 2 * (1 - pnorm(abs(z_values))) # P-values
+
+odds_ratios2 <- exp(coef_interaction1) # Odds ratios
+ci_lower2 <- exp(coef_interaction2 - 1.96 * se_interaction2) # Lower bound of CI
+ci_upper2 <- exp(coef_interaction2 + 1.96 * se_interaction2) # Upper bound of CI
+
+# Create a tidy data frame for reporting
+results_table2 <- data.frame(
+  Predictor = rownames(coef_interaction2),
+  Odds_Ratio = odds_ratios2,
+  CI_Lower = ci_lower2,
+  CI_Upper = ci_upper2,
+  P_Value = p_values2
+)
+
+# Save the table to a CSV file or view it
+print(results_table2)
+```
+
+
+
