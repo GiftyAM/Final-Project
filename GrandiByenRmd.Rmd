@@ -297,7 +297,7 @@ print(table1)
 ```
 
 ```{r}
-# creating a morbidity count variable if not done already
+# Creating a morbidity count variable if not done already
 GB3 <- GB3 %>%
   mutate(
     Morbidity_Count = rowSums(across(c(Any.STI, Hypertension, Anemia, Gestational.diabetes..Diabetes, Pre.eclampsia..Eclampsia, COVID.19, Other), 
@@ -336,6 +336,7 @@ morbidity_summary
 ```
 
 ```{r}
+#Displaying the table
 print(table1)
 ```
 
@@ -360,7 +361,7 @@ colnames(GB4)
 
 ```
 ```{r}
-# Create a summary table
+# Creating a summary table
 table1_summary <- GB4 %>%
   select(
     Age, Age_Category, Number.of.children.in.household, 
@@ -375,6 +376,7 @@ table1_summary <- GB4 %>%
 
 
 ```{r}
+#Creating an updated table
 tbl <- GB4 %>%
   tbl_summary(
     by = NULL,  # Summarize overall (no grouping variable)
@@ -382,11 +384,8 @@ tbl <- GB4 %>%
   )
 
 
-# Print the summary table
+# Printing the summary table
 print(tbl)
-
-
-
 
 
 ```
@@ -410,6 +409,7 @@ table(GB4$Age_Category, GB4$Gross_Motor_Category)
 
 
 ```{r}
+#Creating contingency tables
 table(GB4$Occupation, GB4$Communication_Category)
 table(GB4$Occupation, GB4$Fine_Motor_Category)
 table(GB4$Occupation, GB4$Gross_Motor_Category)
@@ -432,6 +432,7 @@ fisher_gm
 ```
 
 ```{r}
+#Creating contingency tables
 table(GB4$Education, GB4$Communication_Category)
 table(GB4$Education, GB4$Fine_Motor_Category)
 table(GB4$Education, GB4$Gross_Motor_Category)
@@ -451,6 +452,7 @@ fisher_edu_gm
 ```
 
 ```{r}
+#Creating contingency tables
 table(GB4$MDD, GB4$Communication_Category)
 table(GB4$MDD, GB4$Fine_Motor_Category)
 table(GB4$MDD, GB4$Gross_Motor_Category)
@@ -470,12 +472,14 @@ fisher_MDD_gm
 ```
 
 ```{r}
+#Creating contingency tables
 table(GB4$Maternal_Morbidity_Category, GB4$Communication_Category)
 table(GB4$Maternal_Morbidity_Category, GB4$Fine_Motor_Category)
 table(GB4$Maternal_Morbidity_Category, GB4$Gross_Motor_Category)
 ```
 
 ```{r}
+# Checking p-values for each ASQ category
 fisher_Morb_comm <- fisher.test(table(GB4$Maternal_Morbidity_Category, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
 fisher_Morb_comm
 
@@ -488,12 +492,14 @@ fisher_Morb_gm
 ```
 
 ```{r}
+#Creating contingency tables
 table(GB4$Sex..Child., GB4$Communication_Category)
 table(GB4$Sex..Child., GB4$Fine_Motor_Category)
 table(GB4$Sex..Child., GB4$Gross_Motor_Category)
 ```
 
 ```{r}
+# Checking p-values for each ASQ category
 fisher_sex_comm <- fisher.test(table(GB4$Sex..Child., GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
 fisher_sex_comm
 
@@ -506,12 +512,14 @@ fisher_sex_gm
 ```
 
 ```{r}
+#Creating contingency tables
 table(GB4$Number.of.children.in.household, GB4$Communication_Category)
 table(GB4$Number.of.children.in.household, GB4$Fine_Motor_Category)
 table(GB4$Number.of.children.in.household, GB4$Gross_Motor_Category)
 ```
 
 ```{r}
+# Checking p-values for each ASQ category
 fisher_children_comm <- fisher.test(table(GB4$Number.of.children.in.household, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
 fisher_children_comm
 
@@ -527,12 +535,14 @@ fisher_children_gm
 
 
 ```{r}
+#Creating contingency tables
 table(GB4$Child_Chronic_Disease_Category, GB4$Communication_Category)
 table(GB4$Child_Chronic_Disease_Category, GB4$Fine_Motor_Category)
 table(GB4$Child_Chronic_Disease_Category, GB4$Gross_Motor_Category)
 ```
 
 ```{r}
+# Checking p-values for each ASQ category
 fisher_chronic_comm <- fisher.test(table(GB4$Child_Chronic_Disease_Category, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
 fisher_chronic_comm
 
@@ -545,12 +555,14 @@ fisher_chronic_gm
 ```
 
 ```{r}
+#Creating contingency tables
 table(GB4$Home, GB4$Communication_Category)
 table(GB4$Home, GB4$Fine_Motor_Category)
 table(GB4$Home, GB4$Gross_Motor_Category)
 ```
 
 ```{r}
+# Checking p-values for each ASQ category
 fisher_home_comm <- fisher.test(table(GB4$Home, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
 fisher_home_comm
 
@@ -564,7 +576,7 @@ fisher_home_gm
 
 
 
-Test 
+
 ```{r}
 # Checking p-values for each ASQ category
 fisher_occ_comm <- fisher.test(table(GB4$Occupation, GB4$Communication_Category), simulate.p.value = TRUE, B = 10000)
@@ -581,14 +593,8 @@ fisher_occ_gm
 
 
 
-Test Keep
 ```{r}
-str(GB4$Communication_Category)
-
-```
-
-```{r}
-# Ensure the categories are ordered if appropriate
+# Ensuring the categories are ordered if appropriate
 GB4$Communication_Category <- factor(
   GB4$Communication_Category, 
   levels = c("Below cutoff", "Monitoring zone", "On schedule"), 
@@ -609,10 +615,12 @@ GB4$Gross_Motor_Category <- factor(
 
 ```
 
+
 ```{r}
+#Loading necessary library
 library(MASS)
 
-# Fit ordinal logistic regression models
+# Fitting ordinal logistic regression models
 model_communication <- polr(Communication_Category ~ Age_Category, data = GB4, method = "logistic")
 model_fine_motor <- polr(Fine_Motor_Category ~ Age_Category, data = GB4, method = "logistic")
 model_gross_motor <- polr(Gross_Motor_Category ~ Age_Category, data = GB4, method = "logistic")
@@ -620,7 +628,7 @@ model_gross_motor <- polr(Gross_Motor_Category ~ Age_Category, data = GB4, metho
 ```
 
 ```{r}
-# Helper function to format results
+#Formatting the results
 format_results <- function(coefs) {
   data.frame(
     Predictor = rownames(coefs),
@@ -633,12 +641,12 @@ format_results <- function(coefs) {
   )
 }
 
-# Format results for each model
+# Formatting results for each model
 communication_results <- format_results(summary(model_communication)$coefficients)
 fine_motor_results <- format_results(summary(model_fine_motor)$coefficients)
 gross_motor_results <- format_results(summary(model_gross_motor)$coefficients)
 
-# Combine all results into one table
+# Combining all results into one table
 library(dplyr)
 all_results <- bind_rows(
   communication_results %>% mutate(Skill = "Communication"),
@@ -646,7 +654,7 @@ all_results <- bind_rows(
   gross_motor_results %>% mutate(Skill = "Gross Motor")
 )
 
-# Display the table in a clean format
+# Displaying the table in a clean format
 library(knitr)
 all_results %>%
   kable(
@@ -660,6 +668,7 @@ all_results %>%
 
 
 ```{r}
+# More wrangling to categorize Number of children in household
 library(dplyr)
 GB4 <- GB4 %>%
   mutate(Number.of.children.in.household = case_when(
@@ -726,6 +735,7 @@ GB4$Occupation <- factor(GB4$Occupation)
 ```
 
 ```{r}
+#Viewing contents of each Variable
 levels(GB4$Maternal_Morbidity_Category)
 levels(GB4$Education)
 levels(GB4$Delivery.method)
@@ -742,6 +752,7 @@ levels(GB4$Number.of.children.in.household)
 
 
 ```{r}
+#Viewing contents of variables for NAs
 summary(GB4$Child_Chronic_Disease_Category)
 summary(GB4$Age_Category)
 summary(GB4$Sex..Child.)
@@ -758,19 +769,20 @@ summary(GB4$Delivery.method)
 ```
 
 ```{r}
+#More detailed viewing
 summary(GB4)
 ```
 
 
 
 ```{r}
-# Subset the dataset to include only the relevant variables
+# Subsetting the dataset to include only the relevant variables
 subset_GB4 <- GB4[, c( "id" , "Maternal_Morbidity_Category", "Child_Chronic_Disease_Category", "MDD", "Sex..Child." , "Occupation")]
 
 colnames(GB4)
 
 
-# Convert Occupation and other categorical variables to factors
+# Converting Occupation and other categorical variables to factors
 subset_GB4$Occupation <- factor(GB4$Occupation, exclude = NULL)  # Include NA levels explicitly
 subset_GB4$MDD <- factor(GB4$MDD, levels = c(0, 1, 2, 3, 4, 5, 6, 7))
 subset_GB4$Maternal_Morbidity_Category <- factor(GB4$Maternal_Morbidity_Category)
@@ -778,13 +790,14 @@ subset_GB4$Child_Chronic_Disease_Category <- factor(GB4$Child_Chronic_Disease_Ca
 subset_GB4$Sex..Child. <- factor(GB4$Sex..Child., exclude = NULL)
 
 
-# Check the subset
+# Checking the subset
 head(subset_GB4)
 
 ```
 
 
 ```{r}
+#Imputation for missing data
 # Loading the mice package
 library(mice)
 # Convert MDD to a factor with all levels, including the missing levels
@@ -830,11 +843,12 @@ head(completed_data)
 ```
 
 ```{r}
+#Viewing the data
 summary(completed_data)
 ```
 
 ```{r}
-# Check the column names of GB4
+# Checking the column names of GB4
 colnames(GB4)
 
 ```
@@ -842,21 +856,21 @@ colnames(GB4)
 
 ```{r}
 
-# Subset the variables you want from GB4
+# Subsetting the variables needed from GB4
 subset1_GB4 <- GB4[, c("id", "Age_Category", "Communication_Category", 
                        "Fine_Motor_Category", "Gross_Motor_Category", 
                        "Home", "Education", 
                        "Number.of.children.in.household", "Childbirthweight.category")]
 
 
-# Merge the subset of GB4 with completed_data
+# Merging the subset of GB4 with completed_data
 # Replace "id" with your common identifier column
 GB5 <- merge(completed_data, subset1_GB4, by = "id", all.x = TRUE)
 
-# Check the structure of the new dataset
+# Checking the structure of the new dataset
 str(GB5)
 
-# View the first few rows of the new dataset
+# Viewing the first few rows of the new dataset
 head(GB5)
 
 
@@ -867,7 +881,7 @@ head(GB5)
 
 
 ```{r}
-# Replace the variables in the original dataset (GB4) with the imputed values
+# Replacing the variables in the original dataset (GB4) with the imputed values
 GB4$Maternal_Morbidity_Category <- completed_data$Maternal_Morbidity_Category
 GB4$Child_Chronic_Disease_Category <- completed_data$Child_Chronic_Disease_Category
 GB4$MDD <- completed_data$MDD
@@ -877,13 +891,12 @@ summary(GB4)
 ```
 
 ```{r}
-# Ensure both datasets have the same common identifier column (e.g., "id")
-# Replace "id" with your actual common identifier if different
+#Merging data with "id"
 if (!"id" %in% colnames(completed_data)) {
   stop("Make sure both datasets have a common identifier column, like 'id'")
 }
 
-# Merge completed_data with GB4
+# Merging completed_data with GB4
 merged_data <- merge(completed_data, GB4, by = "id", all.x = TRUE)
 
 # Check the structure of the merged dataset
@@ -897,7 +910,7 @@ summary(GB4)
 
 ```{r}
 
-# Select relevant variables from GB4
+# Selecting relevant variables from GB4
 GB5 <- GB4[, c(
   "id", 
   "Age", 
@@ -920,6 +933,7 @@ GB5 <- GB4[, c(
 
 
 ```{r}
+#Viewing the new dataset
 summary(GB5)
 ```
 
@@ -928,21 +942,20 @@ summary(GB5)
 
 
 ```{r}
-
-# Fit a model with interaction terms for maternal age and other variables
-# Load necessary library
+# Fitting a model with interaction terms for maternal age and other variables
+# Loading necessary library
 library(nnet)
 
-# Fit a multinomial logistic regression model with interaction
+# Fitting a multinomial logistic regression model with interaction
 mod_interaction <- multinom(Communication_Category ~ Age_Category * Occupation + 
                             Age_Category * Home ,
                             data = GB5)
 
-# Extract coefficients and standard errors
+# Extracting coefficients and standard errors
 coef_interaction <- coef(mod_interaction) # Coefficients
 se_interaction <- summary(mod_interaction)$standard.errors # Standard errors
 
-# Calculate odds ratios, 95% CIs, and p-values
+# Calculating odds ratios, 95% CIs, and p-values
 z_values <- coef_interaction / se_interaction
 p_values <- 2 * (1 - pnorm(abs(z_values))) # P-values
 
@@ -950,7 +963,7 @@ odds_ratios <- exp(coef_interaction) # Odds ratios
 ci_lower <- exp(coef_interaction - 1.96 * se_interaction) # Lower bound of CI
 ci_upper <- exp(coef_interaction + 1.96 * se_interaction) # Upper bound of CI
 
-# Create a tidy data frame for reporting
+# Creating a tidy data frame for reporting
 results_table <- data.frame(
   Predictor = rownames(coef_interaction),
   Odds_Ratio = odds_ratios,
@@ -959,7 +972,7 @@ results_table <- data.frame(
   P_Value = p_values
 )
 
-# Save the table to a CSV file or view it
+# Saving the table to a CSV file or view it
 print(results_table)
 
 
@@ -968,16 +981,16 @@ print(results_table)
 
 
 ```{r}
-#Fit a multinomial logistic regression model with interaction
+#Fitting a multinomial logistic regression model with interaction
 mod_interaction1 <- multinom(Fine_Motor_Category ~ Age_Category * Occupation + 
                             Age_Category * Home ,
                             data = GB5)
 
-# Extract coefficients and standard errors
+# Extracting coefficients and standard errors
 coef_interaction1 <- coef(mod_interaction1) # Coefficients
 se_interaction1 <- summary(mod_interaction1)$standard.errors # Standard errors
 
-# Calculate odds ratios, 95% CIs, and p-values
+# Calculating odds ratios, 95% CIs, and p-values
 z_values1 <- coef_interaction1 / se_interaction
 p_values1 <- 2 * (1 - pnorm(abs(z_values))) # P-values
 
@@ -985,7 +998,7 @@ odds_ratios1 <- exp(coef_interaction1) # Odds ratios
 ci_lower1 <- exp(coef_interaction1 - 1.96 * se_interaction1) # Lower bound of CI
 ci_upper1 <- exp(coef_interaction1 + 1.96 * se_interaction1) # Upper bound of CI
 
-# Create a tidy data frame for reporting
+# Creating a tidy data frame for reporting
 results_table1 <- data.frame(
   Predictor = rownames(coef_interaction1),
   Odds_Ratio = odds_ratios1,
@@ -994,21 +1007,21 @@ results_table1 <- data.frame(
   P_Value = p_values1
 )
 
-# Save the table to a CSV file or view it
+# Saving the table to a CSV file or view it
 print(results_table1)
 ```
 
 ```{r}
-#Fit a multinomial logistic regression model with interaction
+#Fitting a multinomial logistic regression model with interaction
 mod_interaction2 <- multinom(Gross_Motor_Category ~ Age_Category * Occupation + 
                             Age_Category * Home ,
                             data = GB5)
 
-# Extract coefficients and standard errors
+# Extracting coefficients and standard errors
 coef_interaction2 <- coef(mod_interaction2) # Coefficients
 se_interaction2 <- summary(mod_interaction2)$standard.errors # Standard errors
 
-# Calculate odds ratios, 95% CIs, and p-values
+# Calculating odds ratios, 95% CIs, and p-values
 z_values2 <- coef_interaction1 / se_interaction
 p_values2 <- 2 * (1 - pnorm(abs(z_values))) # P-values
 
@@ -1016,7 +1029,7 @@ odds_ratios2 <- exp(coef_interaction1) # Odds ratios
 ci_lower2 <- exp(coef_interaction2 - 1.96 * se_interaction2) # Lower bound of CI
 ci_upper2 <- exp(coef_interaction2 + 1.96 * se_interaction2) # Upper bound of CI
 
-# Create a tidy data frame for reporting
+# Creating a tidy data frame for reporting
 results_table2 <- data.frame(
   Predictor = rownames(coef_interaction2),
   Odds_Ratio = odds_ratios2,
@@ -1025,7 +1038,7 @@ results_table2 <- data.frame(
   P_Value = p_values2
 )
 
-# Save the table to a CSV file or view it
+# Saving the table to a CSV file or view it
 print(results_table2)
 ```
 
